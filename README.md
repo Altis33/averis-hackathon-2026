@@ -1,44 +1,96 @@
-# Shipping Document Verification Pipeline
+# 🐰 Snowbunnies — Shipping Document Verification System
 
-Welcome to our hackathon submission! We have built a lightweight, highly reliable, and purely programmatic Python pipeline to solve the Shipping Document Verification challenge. 
+An automated pipeline that reads a shipping operations inbox and, for each email, classifies it, extracts shipment data from attached documents, and compares Shipping Instructions (SI) against draft Bills of Lading (BL) to catch discrepancies before the draft is finalised.
 
-Our solution successfully tackles the **Advanced Stage** challenges (messy inputs, PDF/Word/Excel extraction, and human-in-the-loop reliability) and achieves an **82% End-to-End Score**.
-
-## 🚀 How to Run the Code
-
-To process the dataset and generate the final output, simply run the unified pipeline script from the root directory:
-
-```bash
-pip install pypdf docx2txt openpyxl
-python3 pipeline.py
-```
-
-This will automatically process all emails in the `sdoc-hackathon-bundle` dataset and generate the final **`submission_final.json`**.
+**Final Score: 82% end-to-end accuracy**
 
 ---
 
-## 📂 Project Structure (Where to look)
+## 🚀 Quick Start
 
-To keep things modular and easy to evaluate, we split the logic into four core engines located in the root directory:
+```bash
+# 1. Install dependencies
+pip install -r requirements.txt
 
-### 1. `classification.py` (Part A: Inbox Routing)
-Handles the Stage 1 email classification. Uses smart keyword heuristics on email subjects, bodies, and attachment names to correctly route emails into the 5 categories (achieving ~90% accuracy).
+# 2. Run the web UI
+streamlit run app.py
 
-### 2. `doc_parser.py` (Advanced Stage: File Attachments)
-Bypasses the basic plain-text assumption. It dynamically detects file extensions and uses standard libraries (`pypdf`, `docx2txt`, `openpyxl`) to extract raw text and tables directly from realistic PDFs, Word Docs, and Excel files.
+# 3. (Optional) Run the headless pipeline
+python3 pipeline.py
+```
 
-### 3. `extraction.py` (Part B: Data Extraction & Messy Inputs)
-Uses highly relaxed regular expressions. Instead of breaking on formatting differences (e.g., "Load Port" vs "Port of Loading", or missing colons), it seamlessly aligns varied labels to the 7 core fields.
+---
 
-### 4. `comparison.py` (Part C: Comparison & Reliability)
-The decision engine. It normalizes strings (stripping punctuation, harmonizing casing) and checks for substring containment to compare SI and BL fields accurately. 
-**Human-in-the-loop:** It also contains our reliability safety nets, successfully escalating 100% of unreadable documents, missing attachments, and wrong document types to `NEEDS_REVIEW`.
+## 📂 Project Structure
+
+```
+Hackathon/
+├── app.py                  # Streamlit web UI (main entry point)
+├── pipeline.py             # Headless end-to-end pipeline (generates submission JSON)
+│
+├── classification.py       # Stage 1: Email classification (5 categories)
+├── doc_parser.py           # Document parser (PDF, DOCX, XLSX, TXT)
+├── extraction.py           # Stage 2: Field extraction (7 shipping fields)
+├── comparison.py           # Stage 3: SI vs BL comparison & escalation logic
+├── llm_extraction.py       # AI-enhanced extraction (OpenAI GPT / Anthropic Claude)
+│
+├── requirements.txt        # Python dependencies
+├── submission_final.json   # Generated submission output
+│
+├── sdoc-hackathon-bundle/  # Dataset (emails + attachments)
+│   ├── inbox/              # Email JSON records
+│   ├── attachments/        # SI and BL documents (txt, pdf, docx, xlsx)
+│   ├── loader.py           # Provided data loader
+│   └── sample_submission.json
+│
+└── sdoc-hackathon-docker/  # Scoring server (provided by organisers)
+    └── server/
+        └── score_cli.py    # Local scoring tool
+```
+
+---
+
+## 🏗️ Architecture
+
+The system is split into four independent, modular engines:
+
+| Module | Role | Rubric Criteria |
+|---|---|---|
+| `classification.py` | Routes emails into BL_COMPARISON, SI_REQUEST, INVOICE_QUERY, GENERAL, SPAM | Stage 1 (30%) |
+| `doc_parser.py` | Reads PDF, Word, Excel, and plain-text attachments | Advanced Stage |
+| `extraction.py` | Extracts 7 shipping fields using relaxed regex patterns | Stage 2 |
+| `comparison.py` | Normalises values and compares SI vs BL, with escalation logic | Stage 3 (20%) + End-to-End (50%) |
+| `llm_extraction.py` | Optional GPT / Claude fallback for fields regex cannot extract | Technology Integration |
+
+---
+
+## 🤖 AI / LLM Integration
+
+The system uses a **hybrid approach**:
+- **Primary engine**: Fast, deterministic regex-based extraction (zero cost, milliseconds)
+- **Fallback layer**: OpenAI GPT-4o-mini or Anthropic Claude Sonnet fills in fields the regex engine missed
+
+Toggle the AI layer on/off in the web UI sidebar under **⚙️ AI Model Settings**.
 
 ---
 
 ## 📊 Evaluation
 
-If you have the local scoring server running, you can verify our results by running:
 ```bash
+# Score the submission against ground truth
 python3 sdoc-hackathon-docker/server/score_cli.py submission_final.json
 ```
+
+| Metric | Score |
+|---|---|
+| Classification accuracy | 90.2% |
+| Defect recall | 97.8% |
+| Defect precision | 81.8% |
+| Escalation recall | 75.0% (15/20 edge cases caught) |
+| **Final score** | **82.02%** |
+
+---
+
+## 👥 Team
+
+**Snowbunnies** — SDOC Hackathon 2026

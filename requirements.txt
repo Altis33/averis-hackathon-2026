@@ -1,0 +1,7 @@
+streamlit
+pypdf
+docx2txt
+openpyxl
+openai
+anthropic
+pandas
