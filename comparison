@@ -2,6 +2,7 @@
 # Last edited by Jonathan
 # Last edited date: 21/9/2026
 
+# 1. Text Normalization
 def normalize_text(text):
   """Cleans text by making it lowercase, removing extra spaces,
 
@@ -14,3 +15,16 @@ def normalize_text(text):
   # Remove trailing periods or commas
   cleaned = cleaned.replace(".", "").replace(",", "")
   return cleaned
+
+# 2. Number and Weight Normalization
+def normalize_number(value):
+  """Cleans weight or container count values for accurate comparison."""
+  if value is None:
+    return None
+  try:
+    # Convert to string, lowercase, and remove 'kg' or spaces
+    cleaned = str(value).lower().replace("kg", "").replace(",", "").strip()
+    return float(cleaned)
+  except ValueError:
+    # Return original if it can't be turned into a number
+    return value
