@@ -1,0 +1,16 @@
+# Comparison and Review Part C Code
+# Last edited by Jonathan
+# Last edited date: 21/9/2026
+
+def normalize_text(text):
+  """Cleans text by making it lowercase, removing extra spaces,
+
+  and stripping basic punctuation.
+  """
+  if not text:
+    return ""
+  # Convert to lowercase and remove surrounding spaces
+  cleaned = str(text).lower().strip()
+  # Remove trailing periods or commas
+  cleaned = cleaned.replace(".", "").replace(",", "")
+  return cleaned
