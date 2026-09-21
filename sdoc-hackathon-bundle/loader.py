@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-loader.py — one-import access to the SDOC hackathon inbox (participants).
+loader.py - one-import access to the SDOC hackathon inbox (participants).
 
 Works two ways with the same API:
 
@@ -17,7 +17,7 @@ Works two ways with the same API:
   ...                                    # identical loop
 
 No third-party dependencies for the plain-text path (only stdlib). Reading
-PDF/DOCX/XLSX attachments is up to your pipeline — see read_bytes().
+PDF/DOCX/XLSX attachments is up to your pipeline - see read_bytes().
 
 You do NOT have ground truth. Produce a submission dict shaped like
 sample_submission.json and either score it with score_cli.py (if organizers
