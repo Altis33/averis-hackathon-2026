@@ -28,3 +28,63 @@ def normalize_number(value):
   except ValueError:
     # Return original if it can't be turned into a number
     return value
+
+# 3. The 7-Field Comparison
+def compare_shipment(si_data, bl_data):
+  """Compares 7 key shipment fields between SI and BL data.
+
+  Returns a status ('OK', 'MISMATCH', or 'NEEDS_REVIEW') and details.
+  """
+  # The 7 required fields specified in the project guidelines
+  fields_to_check = [
+      "shipper",
+      "consignee",
+      "notify party",
+      "port of loading",
+      "port of discharge",
+      "container count",
+      "gross weight",
+  ]
+
+  mismatches = {}
+  needs_review = False
+
+  # Safety check: if either document data is missing entirely
+  if not si_data or not bl_data:
+    return {
+        "status": "NEEDS_REVIEW",
+        "reason": "Missing document data or unreadable file",
+        "mismatches": {},
+    }
+
+  for field in fields_to_check:
+    si_val = si_data.get(field)
+    bl_val = bl_data.get(field)
+
+    # Flag for human review if a required value is missing
+    if si_val is None or bl_val is None:
+      needs_review = True
+      mismatches[field] = {
+          "si": si_val,
+          "bl": bl_val,
+          "issue": "missing_value",
+      }
+      continue
+
+    # Compare numbers differently from text fields
+    if "weight" in field or "count" in field:
+      if normalize_number(si_val) != normalize_number(bl_val):
+        mismatches[field] = {"si": si_val, "bl": bl_val}
+    else:
+      if normalize_text(si_val) != normalize_text(bl_val):
+        mismatches[field] = {"si": si_val, "bl": bl_val}
+
+# 4. Assign decision status  
+
+  # Final decision status logic
+  if needs_review:
+    return {"status": "NEEDS_REVIEW", "mismatches": mismatches}
+  elif len(mismatches) > 0:
+    return {"status": "MISMATCH", "mismatches": mismatches}
+  else:
+    return {"status": "OK", "mismatches": {}}
