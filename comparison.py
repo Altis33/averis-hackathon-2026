@@ -38,30 +38,46 @@ def compare_fields(si_fields, bl_fields):
     """
     defect_fields = []
     
-    # Check for missing values first (NEEDS_REVIEW)
+    missing_count_si = sum(1 for f in si_fields if si_fields[f] is None)
+    missing_count_bl = sum(1 for f in bl_fields if bl_fields[f] is None)
+    if missing_count_si >= 4 or missing_count_bl >= 4:
+        return "NEEDS_REVIEW", False, [], "wrong_doc_type"
+        
     for field in si_fields:
-        if si_fields[field] is None or bl_fields[field] is None:
+        if si_fields[field] is None and bl_fields[field] is None:
             return "NEEDS_REVIEW", False, [], "missing_value"
+        elif si_fields[field] is None or bl_fields[field] is None:
+            defect_fields.append(field)
 
     # Compare each field
     # 1. Shipper
-    if normalize_company(si_fields['shipper']) != normalize_company(bl_fields['shipper']):
+    s_sh = normalize_company(si_fields['shipper'])
+    b_sh = normalize_company(bl_fields['shipper'])
+    if s_sh not in b_sh and b_sh not in s_sh:
         defect_fields.append('shipper')
         
     # 2. Consignee
-    if normalize_company(si_fields['consignee']) != normalize_company(bl_fields['consignee']):
+    s_co = normalize_company(si_fields['consignee'])
+    b_co = normalize_company(bl_fields['consignee'])
+    if s_co not in b_co and b_co not in s_co:
         defect_fields.append('consignee')
         
     # 3. Notify Party
-    if normalize_company(si_fields['notify_party']) != normalize_company(bl_fields['notify_party']):
+    s_np = normalize_company(si_fields['notify_party'])
+    b_np = normalize_company(bl_fields['notify_party'])
+    if s_np not in b_np and b_np not in s_np:
         defect_fields.append('notify_party')
         
     # 4. Port of Loading
-    if normalize_port(si_fields['port_of_loading']) != normalize_port(bl_fields['port_of_loading']):
+    s_pl = normalize_port(si_fields['port_of_loading'])
+    b_pl = normalize_port(bl_fields['port_of_loading'])
+    if s_pl not in b_pl and b_pl not in s_pl:
         defect_fields.append('port_of_loading')
         
     # 5. Port of Discharge
-    if normalize_port(si_fields['port_of_discharge']) != normalize_port(bl_fields['port_of_discharge']):
+    s_pd = normalize_port(si_fields['port_of_discharge'])
+    b_pd = normalize_port(bl_fields['port_of_discharge'])
+    if s_pd not in b_pd and b_pd not in s_pd:
         defect_fields.append('port_of_discharge')
         
     # 6. Container Count
